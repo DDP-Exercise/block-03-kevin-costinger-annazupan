@@ -39,15 +39,82 @@
  *     the scope of his variables and of course, makes use of
  *     event delegation, to keep his event listeners tidied up!
  *
- *     You - 2026-03-25
+ *     Anna Zupan - 2026-04-13
  *******************************************************/
 let sumExpenses = 0; //Use this variable to keep the sum up to date.
 
 function submitForm(e){
     //TODO: Prevent the default behavior of the submit button.
     //TODO: Validate the form. If everything is fine, add the expense to the tracker and reset the form.
+
+    e.preventDefault();
+
+    let dateField = document.getElementById("date");
+    let amountField = document.getElementById("amount");
+    let expenseField = document.getElementById("expense");
+
+    let dateVal = dateField.value;
+    let amountVal = parseFloat(amountField.value);
+    let expenseVal = expenseField.value;
+
+    if (isEmpty(dateVal)) {
+        alert("Bitte Datum eingeben!");
+        dateField.focus();
+        return;
+    }
+    if (isNaN(amountVal) || amountVal < 0.01) {
+        alert("Bitte einen Betrag mit mindestens 0.01 eingeben!");
+        amountField.focus();
+        return;
+    }
+    if (expenseVal.length < 3) {
+        alert("Bitte einen Text mit mindestens 3 Zeichen eingeben!");
+        expenseField.focus();
+        return;
+    }
+
+    let tr = document.createElement("tr");
+    tr.dataset.amount = amountVal;
+
+    let tdDate = document.createElement("td");
+    tdDate.textContent = dateVal;
+
+    let tdAmount = document.createElement("td");
+    tdAmount.textContent = formatEuro(amountVal);
+
+    let tdText = document.createElement("td");
+    tdText.textContent = expenseVal;
+
+    let tdDelete = document.createElement("td");
+    let deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "X";
+    tdDelete.append(deleteBtn);
+
+    tr.append(tdDate, tdAmount, tdText, tdDelete);
+    document.querySelector("#expenses tbody").append(tr);
+
+    sumExpenses += amountVal;
+    document.getElementById("expenseSum").textContent = formatEuro(sumExpenses);
+
+    e.target.reset();
 }
 
+let form = document.querySelector("form");
+form.addEventListener("submit", submitForm);
+
+let table = document.getElementById("expenses");
+table.addEventListener("click", function(e) {
+    if (e.target.tagName === "BUTTON") {
+        let row = e.target.closest("tr");
+
+        let amountToRemove = parseFloat(row.dataset.amount);
+        sumExpenses -= amountToRemove;
+
+        document.getElementById("expenseSum").textContent = formatEuro(sumExpenses);
+
+        row.remove();
+    }
+});
 
 /*****************************
  * DO NOT CHANGE CODE BELOW.
